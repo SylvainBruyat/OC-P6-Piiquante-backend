@@ -3,6 +3,8 @@ const USERS = require("./routes/auth/index.js")
 const EXPRESS = require("express");
 const APP = EXPRESS();
 
+APP.use(EXPRESS.json());
+
 APP.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -10,7 +12,12 @@ APP.use((req, res, next) => {
     next();
   });
 
-APP.use('/api/sauces', (req, res, next) => {
+APP.post('/api/sauces', (req, res, next) => {
+    console.log(req.body);
+    res.status(201).json({message: "Sauce créée"});
+})
+
+APP.get('/api/sauces', (req, res, next) => {
     const listOfSauces = [
         {
             userId: "abcde",
