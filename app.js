@@ -1,31 +1,35 @@
-const USERS = require("./routes/auth/index.js")
+const users = require("./routes/auth/UserIndex.js")
 
-const EXPRESS = require("express");
-const MONGOOSE = require("mongoose");
-const APP = EXPRESS();
+const express = require("express");
+const mongoose = require("mongoose");
+const app = express();
 
-MONGOOSE.connect('mongodb+srv://<username>:<password>@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority', {
+/********************************************************************************************************************
+****************************** A sécuriser avant de commit et push vers le repo Github *****************************/
+mongoose.connect('mongodb+srv://<username>:<password>@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority', {
+/********************************************************************************************************************
+********************************************************************************************************************/
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-APP.use(EXPRESS.json());
+app.use(express.json());
 
-APP.use((req, res, next) => {
+app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     next();
 });
 
-APP.post('/api/sauces', (req, res, next) => {
+app.post('/api/sauces', (req, res, next) => {
     console.log(req.body);
     res.status(201).json({message: "Sauce créée"});
 })
 
-APP.get('/api/sauces', (req, res, next) => {
+app.get('/api/sauces', (req, res, next) => {
     const listOfSauces = [
         {
             userId: "abcde",
@@ -70,6 +74,6 @@ APP.get('/api/sauces', (req, res, next) => {
     res.status(200).json(listOfSauces);
 });
 
-/* APP.use("/api/users", USERS); */
+/* app.use("/api/auth", users); */
 
-module.exports = APP;
+module.exports = app;

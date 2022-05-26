@@ -1,5 +1,5 @@
-const HTTP = require('http');
-const APP = require("./app");
+const http = require('http');
+const app = require("./app");
 
 const normalizePort = val => {
     const port = parseInt(val, 10);
@@ -14,13 +14,13 @@ const normalizePort = val => {
 };
 
 const port = normalizePort(process.env.PORT || '3000');
-APP.set("port", port);
+app.set("port", port);
 
 const errorHandler = error => {
     if (error.syscall !== 'listen') {
       throw error;
     }
-    const address = SERVER.address();
+    const address = server.address();
     const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
     switch (error.code) {
       case 'EACCES':
@@ -36,13 +36,13 @@ const errorHandler = error => {
     }
   };
 
-const SERVER = HTTP.createServer(APP);
+const server = http.createServer(app);
 
-SERVER.on('error', errorHandler);
-SERVER.on('listening', () => {
-  const address = SERVER.address();
+server.on('error', errorHandler);
+server.on('listening', () => {
+  const address = server.address();
   const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
   console.log('Listening on ' + bind);
 });
 
-SERVER.listen(port);
+server.listen(port);
