@@ -1,7 +1,15 @@
 const USERS = require("./routes/auth/index.js")
 
 const EXPRESS = require("express");
+const MONGOOSE = require("mongoose");
 const APP = EXPRESS();
+
+MONGOOSE.connect('mongodb+srv://<username>:<password>@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('Connexion à MongoDB réussie !'))
+.catch(() => console.log('Connexion à MongoDB échouée !'));
 
 APP.use(EXPRESS.json());
 
@@ -10,7 +18,7 @@ APP.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     next();
-  });
+});
 
 APP.post('/api/sauces', (req, res, next) => {
     console.log(req.body);
