@@ -24,8 +24,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+app.use('/api/auth', User);
 app.use('/api/sauces', Sauce);
-
-/* app.use("/api/auth", User); */
 
 module.exports = app;
