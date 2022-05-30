@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 
-const User = require('./routes/auth/UserIndex.js');
-const Sauce = require('./routes/sauces/SauceModel.js');
+const User = require('./routes/auth/UserRouter');
+const Sauce = require('./routes/sauces/SauceRouter')
 
 /********************************************************************************************************************
 ****************************** A sécuriser avant de commit et push vers le repo Github *****************************/
@@ -11,12 +11,9 @@ mongoose.connect('mongodb+srv://<username>:<password>@hottakes.ldelc.mongodb.net
 /********************************************************************************************************************
 ********************************************************************************************************************/
     useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("Connexion à MongoDB réussie !"))
-.catch(() => console.log("Connexion à MongoDB échouée !"));
-
-app.use(express.json());
+    useUnifiedTopology: true})
+    .then(() => console.log("Connexion à MongoDB réussie !"))
+    .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,38 +22,9 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/api/sauces', (req, res, next) => {
-    const sauce = new Sauce({
-        ...req.body
-    });
-    sauce.save()
-        .then(() => res.status(201).json({message: "Sauce créée avec succès !"}))
-        .catch(error => res.status(400).json({error}));
-});
+app.use(express.json());
 
-app.get('/api/sauces', (req, res, next) => {
-    Sauce.find()
-        .then(sauces => res.status(200).json(sauces))
-        .catch(error => res.status(400).json({error}));
-});
-
-app.get('/api/sauces/:id', (req, res, next) => {
-    Sauce.findOne({_id: req.params.id})
-        .then(sauce => res.status(200).json(sauce))
-        .catch(error => res.status(404).json({error}));
-});
-
-app.put('/api/sauces/:id', (req, res, next) => {
-    Sauce.updateOne({_id: req.params.id}, {...req.body, _id: req.params.id})
-        .then(() => res.status(200).json({message: "Sauce modifiée avec succès !"}))
-        .catch(error => res.status(400).json({error}));
-})
-
-app.delete('/api/sauces/:id', (req, res, next) => {
-    Sauce.deleteOne({_id: req.params.id})
-        .then(() => res.status(200).json({message: "Sauce supprimée avec succès !"}))
-        .catch(error => res.status(400).json({error}));
-})
+app.use('/api/sauces', Sauce);
 
 /* app.use("/api/auth", User); */
 
