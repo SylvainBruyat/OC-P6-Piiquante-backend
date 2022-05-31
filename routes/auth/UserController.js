@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require('./UserModel');
 
@@ -32,7 +33,11 @@ exports.login = (req, res, next) => {
                     }
                     res.status(200).json({
                         userId: user._id,
-                        token: 'TOKEN'
+                        token: jwt.sign(
+                            {userId: user._id},
+                            'THi5_IS-My&S3CRET+T0ken*ENcrypTION/key', // Clé temporaire pour le développement. A remplacer en production
+                            {expiresIn: '24h'}
+                        )
                     });
                 })
                 .catch(error => {
