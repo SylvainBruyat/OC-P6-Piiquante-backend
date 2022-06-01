@@ -18,11 +18,8 @@ let sauceDefinition = {
 
 let sauceSchema = new mongoose.Schema(sauceDefinition);
 
-module.exports = mongoose.model('Sauce', sauceSchema);
-
-// Renvoi TypeError : Sauce is not a constructor
-/* module.exports = {
+module.exports = {
     definition: sauceDefinition,
     schema: sauceSchema,
     model: mongoose.model("Sauce", sauceSchema)
-}; */
+};
