@@ -6,11 +6,10 @@ const path = require ('path');
 const User = require('./routes/auth/UserRouter');
 const Sauce = require('./routes/sauces/SauceRouter')
 
-/********************************************************************************************************************
-****************************** A sécuriser avant de commit et push vers le repo Github *****************************/
-mongoose.connect('mongodb+srv://<username>:<password>@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority', {
-/********************************************************************************************************************
-********************************************************************************************************************/
+require('dotenv').config()
+
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority`, {
+
     useNewUrlParser: true,
     useUnifiedTopology: true})
     .then(() => console.log("Connexion à MongoDB réussie !"))
