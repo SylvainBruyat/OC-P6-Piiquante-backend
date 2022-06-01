@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const Sauce = require('./SauceModel').model;
 
 exports.createSauce = (req, res, next) => {
@@ -47,8 +49,16 @@ exports.deleteSauce = (req, res, next) => {
                 return res.status(404).json({error: new Error('Objet non trouvé !')});
             if (sauce.userId !== req.auth.userId)
                 return res.status(401).json({error: new Error('Requête non autorisée !')});
+            const filename = sauce.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, () => {
+                Sauce.deleteOne({_id: req.params.id})
+                    .then(() => res.status(200).json({message: "Sauce supprimée avec succès !"}))
+                    .catch(error => res.status(400).json({error}));
+            })
         })
-    Sauce.deleteOne({_id: req.params.id})
-        .then(() => res.status(200).json({message: "Sauce supprimée avec succès !"}))
-        .catch(error => res.status(400).json({error}));
+        .catch(error => {
+            console.error(error);
+            res.status(500).json({message: "Internal error"});
+        })
+    
 };
