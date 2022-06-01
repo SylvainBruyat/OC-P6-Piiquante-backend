@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 let userDefinition = {
-    email: {type: String, required: true, unique: true}, // Vérifier que uniqueValidator ne prend pas la casse en compte
+    email: {type: String, required: true, unique: true, uniqueCaseInsensitive: true},
     password: {type: String, required: true}
 };
 
