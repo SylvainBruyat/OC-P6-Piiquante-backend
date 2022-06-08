@@ -46,9 +46,9 @@ exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({_id: req.params.id})
         .then((sauce) => {
             if (!sauce)
-                return res.status(404).json({error: new Error('Objet non trouvé !')});
+                return res.status(404).json({message: "Objet non trouvé !"});
             if (sauce.userId !== req.auth.userId)
-                return res.status(401).json({error: new Error('Requête non autorisée !')});
+                return res.status(401).json({message: "Requête non autorisée !"});
             const filename = sauce.imageUrl.split('/images/')[1];
             fs.unlink(`images/${filename}`, () => {
                 Sauce.deleteOne({_id: req.params.id})
@@ -60,5 +60,61 @@ exports.deleteSauce = (req, res, next) => {
             console.error(error);
             res.status(500).json({message: "Internal error"});
         })
-    
 };
+
+exports.likeDislikeSauce = async (req, res, next) => {
+    try {
+        let sauce = await Sauce.findOne({_id: req.params.id});
+
+        if (!sauce)
+        return res.status(404).json({message: "Objet non trouvé !"});
+    
+        const userAlreadyLiked = sauce.usersLiked.find(userId => userId == req.auth.userId);
+        const userAlreadyDisliked = sauce.usersDisliked.find(userId => userId == req.auth.userId);
+        switch (req.body.like) {
+            case -1:
+                if (userAlreadyDisliked) {
+                    return res.status(409).json({message: "Vous avez déjà disliké cette sauce !"});
+                }
+                else if (userAlreadyLiked) {
+                    return res.status(409).json({message: "Vous ne pouvez pas disliké une sauce que vous avez déjà liké !"});
+                }
+                else {
+                    await Sauce.updateOne({_id: req.params.id}, {$inc: {dislikes: 1}, $push: {usersDisliked: req.auth.userId}});
+                    res.status(201).json({message: "Dislike pris en compte !"});
+                }
+                break;
+            
+            case 0:
+                if (userAlreadyDisliked) {
+                    await Sauce.updateOne({_id: req.params.id}, {$inc: {dislikes: -1}, $pull: {usersDisliked: req.auth.userId}});
+                    res.status(201).json({message: "Dislike supprimé !"});
+                }
+                else if (userAlreadyLiked) {
+                    await Sauce.updateOne({_id: req.params.id}, {$inc: {likes: -1}, $pull: {usersLiked: req.auth.userId}});
+                    res.status(201).json({message: "Like supprimé !"});
+                }
+                else {
+                    return res.status(409).json({message: "Vous n'avez pas de like ou dislike à supprimer pour cette sauce !"});
+                }
+                break;
+            
+            case 1:
+                if (userAlreadyDisliked) {
+                    return res.status(409).json({message: "Vous ne pouvez pas liké une sauce que vous avez déjà disliké !"});
+                }
+                else if (userAlreadyLiked) {
+                    return res.status(409).json({message: "Vous avez déjà liké cette sauce !"});
+                }
+                else {
+                    await Sauce.updateOne({_id: req.params.id}, {$inc: {likes: 1}, $push: {usersLiked: req.auth.userId}});
+                    res.status(201).json({message: "Like pris en compte !"});
+                }
+                break;
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Internal error"});
+    }
+}
