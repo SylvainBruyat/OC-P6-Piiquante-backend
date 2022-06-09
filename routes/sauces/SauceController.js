@@ -78,7 +78,7 @@ exports.deleteSauce = async (req, res, next) => {
             return res.status(404).json({message: "Sauce non trouvée !"});
 
         if (sauce.userId !== req.auth.userId)
-            return res.status(401).json({message: "Requête non autorisée !"});
+            return res.status(403).json({message: "Requête non autorisée !"});
 
         const filename = sauce.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
