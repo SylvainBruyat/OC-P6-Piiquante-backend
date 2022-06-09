@@ -44,6 +44,18 @@ exports.getOneSauce = async (req, res, next) => {
 
 exports.modifySauce = async (req, res, next) => {
     try {
+        let sauce = await Sauce.findOne({_id: req.params.id});
+
+        const modifiedPicture = req.file;
+        if (modifiedPicture) {
+            const filename = sauce.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, (error) => {
+                if (error) {
+                    console.log(error);
+                    return res.status(500).json({message: "Internal error"});
+                }
+            })
+        }
         const sauceObject = req.file ?
             {
                 ...JSON.parse(req.body.sauce),
