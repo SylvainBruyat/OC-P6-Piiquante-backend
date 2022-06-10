@@ -9,7 +9,6 @@ const Sauce = require('./routes/sauces/SauceRouter')
 require('dotenv').config()
 
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@hottakes.ldelc.mongodb.net/?retryWrites=true&w=majority`, {
-
     useNewUrlParser: true,
     useUnifiedTopology: true})
     .then(() => console.log("Connexion à MongoDB réussie !"))

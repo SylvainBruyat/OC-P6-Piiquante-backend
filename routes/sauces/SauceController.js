@@ -52,7 +52,7 @@ exports.modifySauce = async (req, res, next) => {
             fs.unlink(`images/${filename}`, (error) => {
                 if (error) {
                     console.log(error);
-                    return res.status(500).json({message: "Internal error"});
+                    return res.status(500).json({message: "Internal server error"});
                 }
             })
         }
@@ -78,18 +78,17 @@ exports.deleteSauce = async (req, res, next) => {
             return res.status(404).json({message: "Sauce non trouvée !"});
 
         if (sauce.userId !== req.auth.userId)
-            return res.status(403).json({message: "Requête non autorisée !"});
+            return res.status(403).json({message: "Requête non-autorisée !"});
 
         const filename = sauce.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, () => {
-            Sauce.deleteOne({_id: req.params.id})
-                .then(() => res.status(200).json({message: "Sauce supprimée avec succès !"}))
-                .catch(error => res.status(400).json({error}));
+        fs.unlink(`images/${filename}`, async () => {
+            await Sauce.deleteOne({_id: req.params.id});
+            res.status(200).json({message: "Sauce supprimée avec succès !"});
         })
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -143,6 +142,6 @@ exports.likeDislikeSauce = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
