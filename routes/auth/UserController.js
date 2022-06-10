@@ -35,7 +35,7 @@ exports.login = async (req, res, next) => {
                     userId: user._id,
                     token: jwt.sign(
                         {userId: user._id},
-                        'THi5_IS-My&S3CRET+T0ken*ENcrypTION/key', // Clé temporaire pour le développement. A remplacer en production
+                        process.env.TOKEN_KEY,
                         {expiresIn: '24h'}
                     )
                 });
