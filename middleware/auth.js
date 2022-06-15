@@ -6,12 +6,12 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
         const userId = decodedToken.userId;
         req.auth = {userId};
-        if (req.body.userId && req.body.userId !== userId) // Eventuellement à supprimer en déplaçant la gestion du userId dans les controllers
+        if (req.body.userId && req.body.userId !== userId)
             throw 'User ID non valable';
         else
             next();
     }
     catch (error) {
-        res.status(403).json({error: error || "Requête non-autorisée"});
+        res.status(401).json({error: error || "Requête non-autorisée"});
     }
 };

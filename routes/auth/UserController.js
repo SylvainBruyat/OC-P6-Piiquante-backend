@@ -15,7 +15,7 @@ exports.signup = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal server error"}); // Renvoie cette erreur si l'e-mail existe déjà dans la BDD
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -23,7 +23,7 @@ exports.login = async (req, res, next) => {
     try {
         let user = await User.findOne({email: req.body.email})
         if (!user)
-            return res.status(401).json({error: "Il n'y a pas de compte lié à cette adresse e-mail"});
+            return res.status(404).json({error: "Il n'y a pas de compte lié à cette adresse e-mail"});
 
         let validPassword = await bcrypt.compare(req.body.password, user.password)
         if (!validPassword)

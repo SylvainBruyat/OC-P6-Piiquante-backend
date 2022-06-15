@@ -14,11 +14,12 @@ exports.createSauce = async (req, res, next) => {
             usersLiked: [],
             usersDisliked: []
         });
-        await sauce.save(); //Renvoie le produit créé (y compris l'ID) quand la promise est résolue
+        await sauce.save();
         res.status(201).json({message: "Sauce créée avec succès !"});
     }
     catch (error) {
-        res.status(400).json({error});
+        console.error(error);
+        res.status(500).json({messge: "Internal server error"});
     }
 }
 
@@ -28,17 +29,21 @@ exports.getAllSauces = async (req, res, next) => {
         res.status(200).json(sauces);
     }
     catch (error) {
-        res.status(400).json({error});
+        console.error(error);
+        res.status(500).json({messge: "Internal server error"});
     }
 }
 
 exports.getOneSauce = async (req, res, next) => {
     try {
         let sauce = await Sauce.findOne({_id: req.params.id});
+        if (!sauce)
+            return res.status(404).json({message: "Sauce non trouvée !"});
         res.status(200).json(sauce);
     }
     catch (error) {
-        res.status(404).json({error});
+        console.error(error);
+        res.status(500).json({messge: "Internal server error"});
     }
 }
 
@@ -53,6 +58,10 @@ exports.modifySauce = async (req, res, next) => {
                 if (error) {
                     console.log(error);
                     return res.status(500).json({message: "Internal server error"});
+                    //Vérifier s'il y a une erreur spécifique pour le cas où la requête est comprise mais ne peut pas
+                    //être exécutée
+
+                    //Trouver une solution pour ne pas exécuter le reste du contrôleur s'il y a une erreur ici
                 }
             })
         }
@@ -66,7 +75,8 @@ exports.modifySauce = async (req, res, next) => {
         res.status(200).json({message: "Sauce modifiée avec succès !"});
     }
     catch (error) {
-        res.status(400).json({error});
+        console.error(error);
+        res.status(500).json({messge: "Internal server error"});
     }
 }
 
@@ -83,6 +93,7 @@ exports.deleteSauce = async (req, res, next) => {
         const filename = sauce.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, async () => {
             await Sauce.deleteOne({_id: req.params.id});
+            //Besoin de gestion d'erreur ici ? Si non, à supprimer dans udpateSauce
             res.status(200).json({message: "Sauce supprimée avec succès !"});
         })
     }
