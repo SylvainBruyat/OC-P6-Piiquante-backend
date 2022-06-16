@@ -54,25 +54,36 @@ exports.modifySauce = async (req, res, next) => {
         const modifiedPicture = req.file;
         if (modifiedPicture) {
             const filename = sauce.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, (error) => {
+            fs.unlink(`images/${filename}`, async (error) => {
                 if (error) {
                     console.log(error);
                     return res.status(500).json({message: "Internal server error"});
-                    //Vérifier s'il y a une erreur spécifique pour le cas où la requête est comprise mais ne peut pas
-                    //être exécutée
-
-                    //Trouver une solution pour ne pas exécuter le reste du contrôleur s'il y a une erreur ici
+                /* TODO Voir s'il y a une meilleure solution que le code dupliqué pour ne pas exécuter le reste du contrôleur
+                s'il y a une erreur ici
+                Utiliser break ? */
+                }
+                else {
+                    const sauceObject = req.file ?
+                        {
+                            ...JSON.parse(req.body.sauce),
+                            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+                        }
+                        : {...req.body};
+                    await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
+                    res.status(200).json({message: "Sauce modifiée avec succès !"});
                 }
             })
         }
-        const sauceObject = req.file ?
-            {
-                ...JSON.parse(req.body.sauce),
-                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-            }
-            : {...req.body};
-        await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
-        res.status(200).json({message: "Sauce modifiée avec succès !"});
+        else {
+            const sauceObject = req.file ?
+                {
+                    ...JSON.parse(req.body.sauce),
+                    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+                }
+                : {...req.body};
+            await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
+            res.status(200).json({message: "Sauce modifiée avec succès !"});
+        }
     }
     catch (error) {
         console.error(error);
@@ -91,15 +102,18 @@ exports.deleteSauce = async (req, res, next) => {
             return res.status(403).json({message: "Requête non-autorisée !"});
 
         const filename = sauce.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, async () => {
+        fs.unlink(`images/${filename}`, async (error) => {
+            if (error) {
+                console.log(error);
+                return res.status(500).json({message: "Internal server error"});
+            }
             await Sauce.deleteOne({_id: req.params.id});
-            //Besoin de gestion d'erreur ici ? Si non, à supprimer dans udpateSauce
             res.status(200).json({message: "Sauce supprimée avec succès !"});
         })
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({message: "Internal server error deleteSauce"});
     }
 }
 
