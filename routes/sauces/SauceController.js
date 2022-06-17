@@ -58,10 +58,10 @@ exports.modifySauce = async (req, res, next) => {
                 if (error) {
                     console.log(error);
                     return res.status(500).json({message: "Internal server error"});
-                /* TODO Voir s'il y a une meilleure solution que le code dupliqué pour ne pas exécuter le reste du contrôleur
-                s'il y a une erreur ici
-                Utiliser break ? */
                 }
+                /* Code dupliqué lignes 66-73 vs 78-85. A refactoriser si possible.
+                Utiliser unlink avec une promesse pour éviter la fonction callback ?
+                Utiliser fs.unlinkSync ? */
                 else {
                     const sauceObject = req.file ?
                         {
