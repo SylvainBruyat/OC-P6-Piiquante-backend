@@ -19,7 +19,7 @@ exports.createSauce = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({messge: "Internal server error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -30,7 +30,7 @@ exports.getAllSauces = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({messge: "Internal server error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -43,7 +43,7 @@ exports.getOneSauce = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({messge: "Internal server error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -87,7 +87,7 @@ exports.modifySauce = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({messge: "Internal server error"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -113,7 +113,7 @@ exports.deleteSauce = async (req, res, next) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal server error deleteSauce"});
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
