@@ -1,4 +1,5 @@
 const fs = require('fs');
+const ftp = require('jsftp');
 
 const Sauce = require('./SauceModel').model;
 
@@ -8,11 +9,19 @@ exports.createSauce = async (req, res, next) => {
         delete sauceObject._id;
         const sauce = new Sauce({
             ...sauceObject,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.originalname}`,
             likes: 0,
             dislikes: 0,
             usersLiked: [],
             usersDisliked: []
+        });
+        const client = await new ftp({
+            host: process.env.FTP_HOST,
+            user: process.env.FTP_USER,
+            pass: process.env.FTP_PASSWORD
+        });
+        await client.put(req.file.buffer, `sites/hottakes.sylvain-bruyat.dev/images/${req.file.originalname}`, (error) =>{
+            if (error) console.log("Erreur d'enregistrement de l'image : ", error);
         });
         await sauce.save();
         res.status(201).json({message: "Sauce créée avec succès !"});
