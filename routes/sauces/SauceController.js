@@ -9,7 +9,7 @@ exports.createSauce = async (req, res, next) => {
         delete sauceObject._id;
         const sauce = new Sauce({
             ...sauceObject,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.originalname}`,
+            imageUrl: `https://hottakes.sylvain-bruyat.dev/images/${req.file.originalname}`,
             likes: 0,
             dislikes: 0,
             usersLiked: [],
