@@ -20,11 +20,13 @@ exports.createSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.put(req.file.buffer, `images/${req.file.originalname}`, (error) =>{
+        await client.put(req.file.buffer, `images/${req.file.originalname}`, async (error) => {
             if (error) throw error;
+            else {
+                await sauce.save();
+                res.status(201).json({message: "Sauce créée avec succès !"});
+            }
         });
-        await sauce.save();
-        res.status(201).json({message: "Sauce créée avec succès !"});
     }
     catch (error) {
         console.error(error);
@@ -116,7 +118,7 @@ exports.deleteSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.raw("DELE", `images/${filename}`, (error, data) => {
+        await client.raw("DELE", `images/${filename}`, async (error, data) => {
             if (error) throw error;
             else {
                 await Sauce.deleteOne({_id: req.params.id});
