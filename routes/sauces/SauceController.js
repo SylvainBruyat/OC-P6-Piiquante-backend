@@ -111,14 +111,24 @@ exports.deleteSauce = async (req, res, next) => {
             return res.status(403).json({message: "Requête non-autorisée !"});
 
         const filename = sauce.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, async (error) => {
+        const client = await new ftp({
+            host: process.env.FTP_HOST,
+            user: process.env.FTP_USER,
+            pass: process.env.FTP_PASSWORD
+        });
+        await client.raw("delete", `sites/hottakes.sylvain-bruyat.dev/images/${filename}`, (err, data) => {
+            if (error) console.log("Erreur de suppression de l'image : ", error);
+            throw error;
+        })
+
+        /* fs.unlink(`images/${filename}`, async (error) => {
             if (error) {
                 console.log(error);
                 return res.status(500).json({message: "Internal server error"});
-            }
-            await Sauce.deleteOne({_id: req.params.id});
-            res.status(200).json({message: "Sauce supprimée avec succès !"});
-        })
+            } */
+        await Sauce.deleteOne({_id: req.params.id});
+        res.status(200).json({message: "Sauce supprimée avec succès !"});
+        /* }) */
     }
     catch (error) {
         console.error(error);
