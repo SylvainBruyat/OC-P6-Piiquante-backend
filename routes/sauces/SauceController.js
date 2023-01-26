@@ -1,4 +1,3 @@
-const fs = require('fs');
 const ftp = require('jsftp');
 
 const Sauce = require('./SauceModel').model;
