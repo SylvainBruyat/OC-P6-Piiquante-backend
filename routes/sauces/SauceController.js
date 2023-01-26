@@ -116,7 +116,7 @@ exports.deleteSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.raw("delete", `sites/hottakes.sylvain-bruyat.dev/images/${filename}`, (err, data) => {
+        await client.raw("delete", `sites/hottakes.sylvain-bruyat.dev/images/${filename}`, (error, data) => {
             if (error) console.log("Erreur de suppression de l'image : ", error);
             throw error;
         })
