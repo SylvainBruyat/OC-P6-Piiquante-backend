@@ -1,4 +1,4 @@
-const fs = require('fs');
+const ftp = require('jsftp');
 
 const Sauce = require('./SauceModel').model;
 
@@ -8,14 +8,24 @@ exports.createSauce = async (req, res, next) => {
         delete sauceObject._id;
         const sauce = new Sauce({
             ...sauceObject,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+            imageUrl: `https://hottakes.sylvain-bruyat.dev/images/${req.file.originalname}`,
             likes: 0,
             dislikes: 0,
             usersLiked: [],
             usersDisliked: []
         });
-        await sauce.save();
-        res.status(201).json({message: "Sauce créée avec succès !"});
+        const client = await new ftp({
+            host: process.env.FTP_HOST,
+            user: process.env.FTP_USER,
+            pass: process.env.FTP_PASSWORD
+        });
+        await client.put(req.file.buffer, `images/${req.file.originalname}`, async (error) => {
+            if (error) throw error;
+            else {
+                await sauce.save();
+                res.status(201).json({message: "Sauce créée avec succès !"});
+            }
+        });
     }
     catch (error) {
         console.error(error);
@@ -51,39 +61,35 @@ exports.modifySauce = async (req, res, next) => {
     try {
         let sauce = await Sauce.findOne({_id: req.params.id});
 
-        const modifiedPicture = req.file;
-        if (modifiedPicture) {
-            const filename = sauce.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, async (error) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(500).json({message: "Internal server error"});
-                }
-                /* Code dupliqué lignes 66-73 vs 78-85. A refactoriser si possible.
-                Utiliser unlink avec une promesse pour éviter la fonction callback ?
-                Utiliser fs.unlinkSync ? */
-                else {
-                    const sauceObject = req.file ?
-                        {
-                            ...JSON.parse(req.body.sauce),
-                            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-                        }
-                        : {...req.body};
-                    await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
-                    res.status(200).json({message: "Sauce modifiée avec succès !"});
-                }
+        if (req.file) {
+            const client = await new ftp({
+                host: process.env.FTP_HOST,
+                user: process.env.FTP_USER,
+                pass: process.env.FTP_PASSWORD
+            });
+
+            await client.put(req.file.buffer, `images/${req.file.originalname}`, (error) => {
+                if (error) throw error;
+            });
+
+            const oldFilename = sauce.imageUrl.split('/images/')[1];
+            await client.auth(process.env.FTP_USER, process.env.FTP_PASSWORD, (error) => {
+                if (error) throw error;
+            })
+            await client.raw("DELE", `images/${oldFilename}`, (error, data) => {
+                if (error) throw error;
             })
         }
-        else {
-            const sauceObject = req.file ?
-                {
-                    ...JSON.parse(req.body.sauce),
-                    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-                }
-                : {...req.body};
-            await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
-            res.status(200).json({message: "Sauce modifiée avec succès !"});
-        }
+        
+        const sauceObject = req.file ?
+            {
+                ...JSON.parse(req.body.sauce),
+                imageUrl: `https://hottakes.sylvain-bruyat.dev/images/${req.file.originalname}`
+            }
+            : {...req.body};
+        await Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id});
+        res.status(200).json({message: "Sauce modifiée avec succès !"});
+        
     }
     catch (error) {
         console.error(error);
@@ -102,13 +108,17 @@ exports.deleteSauce = async (req, res, next) => {
             return res.status(403).json({message: "Requête non-autorisée !"});
 
         const filename = sauce.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, async (error) => {
-            if (error) {
-                console.log(error);
-                return res.status(500).json({message: "Internal server error"});
+        const client = await new ftp({
+            host: process.env.FTP_HOST,
+            user: process.env.FTP_USER,
+            pass: process.env.FTP_PASSWORD
+        });
+        await client.raw("DELE", `images/${filename}`, async (error, data) => {
+            if (error) throw error;
+            else {
+                await Sauce.deleteOne({_id: req.params.id});
+                res.status(200).json({message: "Sauce supprimée avec succès !"});
             }
-            await Sauce.deleteOne({_id: req.params.id});
-            res.status(200).json({message: "Sauce supprimée avec succès !"});
         })
     }
     catch (error) {
