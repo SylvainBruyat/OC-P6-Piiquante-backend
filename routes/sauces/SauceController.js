@@ -69,12 +69,15 @@ exports.modifySauce = async (req, res, next) => {
                 pass: process.env.FTP_PASSWORD
             });
 
-            await client.put(req.file.buffer, `images/${req.file.originalname}`, async (error) => {
+            await client.put(req.file.buffer, `images/${req.file.originalname}`, (error) => {
                 if (error) throw error;
             });
 
             const oldFilename = sauce.imageUrl.split('/images/')[1];
-            await client.raw("DELE", `images/${oldFilename}`, async (error, data) => {
+            await client.auth(FTP_USER, FTP_PASSWORD, (error) => {
+                if (error) throw error;
+            })
+            await client.raw("DELE", `images/${oldFilename}`, (error, data) => {
                 if (error) throw error;
             })
         }
