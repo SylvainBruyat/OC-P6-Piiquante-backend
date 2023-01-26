@@ -20,8 +20,8 @@ exports.createSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.put(req.file.buffer, `sites/hottakes.sylvain-bruyat.dev/images/${req.file.originalname}`, (error) =>{
-            if (error) console.log("Erreur d'enregistrement de l'image : ", error);
+        await client.put(req.file.buffer, `images/${req.file.originalname}`, (error) =>{
+            if (error) throw error;
         });
         await sauce.save();
         res.status(201).json({message: "Sauce créée avec succès !"});
@@ -116,9 +116,8 @@ exports.deleteSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.raw("delete", `sites/hottakes.sylvain-bruyat.dev/images/${filename}`, (error, data) => {
-            if (error) console.log("Erreur de suppression de l'image : ", error);
-            throw error;
+        await client.raw("delete", `images/${filename}`, (error, data) => {
+            if (error) throw error;
         })
 
         /* fs.unlink(`images/${filename}`, async (error) => {
