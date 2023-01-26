@@ -68,7 +68,7 @@ exports.modifySauce = async (req, res, next) => {
                     console.log(error);
                     return res.status(500).json({message: "Internal server error"});
                 }
-                /* Code dupliqué lignes 66-73 vs 78-85. A refactoriser si possible.
+                /* Code dupliqué lignes 75-82 vs 87-94. A refactoriser si possible.
                 Utiliser unlink avec une promesse pour éviter la fonction callback ?
                 Utiliser fs.unlinkSync ? */
                 else {
@@ -116,18 +116,13 @@ exports.deleteSauce = async (req, res, next) => {
             user: process.env.FTP_USER,
             pass: process.env.FTP_PASSWORD
         });
-        await client.raw("delete", `images/${filename}`, (error, data) => {
+        await client.raw("DELE", `images/${filename}`, (error, data) => {
             if (error) throw error;
+            else {
+                await Sauce.deleteOne({_id: req.params.id});
+                res.status(200).json({message: "Sauce supprimée avec succès !"});
+            }
         })
-
-        /* fs.unlink(`images/${filename}`, async (error) => {
-            if (error) {
-                console.log(error);
-                return res.status(500).json({message: "Internal server error"});
-            } */
-        await Sauce.deleteOne({_id: req.params.id});
-        res.status(200).json({message: "Sauce supprimée avec succès !"});
-        /* }) */
     }
     catch (error) {
         console.error(error);
